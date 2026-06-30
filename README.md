@@ -1,4 +1,4 @@
-# Gym Buddy
+# Ani's Workout Planner
 
 A mobile-friendly Push / Pull / Legs workout app for helping a friend get started at the gym. The coach manages exercises and demo videos; the friend picks a workout each visit and checks off exercises as she goes.
 
