@@ -1,0 +1,48 @@
+import {
+  date,
+  integer,
+  pgEnum,
+  pgTable,
+  serial,
+  text,
+  unique,
+} from "drizzle-orm/pg-core";
+
+export const workoutTypeEnum = pgEnum("workout_type", ["push", "pull", "legs"]);
+
+export const workoutPlans = pgTable("workout_plans", {
+  id: serial("id").primaryKey(),
+  type: workoutTypeEnum("type").notNull().unique(),
+  name: text("name").notNull(),
+});
+
+export const exercises = pgTable("exercises", {
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id")
+    .notNull()
+    .references(() => workoutPlans.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  sets: integer("sets").notNull(),
+  reps: text("reps").notNull(),
+  notes: text("notes"),
+  videoUrl: text("video_url"),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const exerciseCompletions = pgTable(
+  "exercise_completions",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    exerciseId: integer("exercise_id")
+      .notNull()
+      .references(() => exercises.id, { onDelete: "cascade" }),
+    completedDate: date("completed_date").notNull(),
+  },
+  (table) => [unique().on(table.userId, table.exerciseId, table.completedDate)],
+);
+
+export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
+export type WorkoutPlan = typeof workoutPlans.$inferSelect;
+export type Exercise = typeof exercises.$inferSelect;
+export type ExerciseCompletion = typeof exerciseCompletions.$inferSelect;
