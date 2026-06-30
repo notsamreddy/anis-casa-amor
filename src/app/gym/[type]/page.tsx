@@ -6,6 +6,7 @@ import { ArrowLeft, Dumbbell } from "lucide-react";
 import { ExerciseChecklist } from "@/components/exercise-checklist";
 import {
   getCompletedExerciseIds,
+  getExerciseSoundEnabled,
   getExercisesByType,
   getWorkoutPlanByType,
 } from "@/lib/queries";
@@ -37,7 +38,10 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
   }
 
   const plan = await getWorkoutPlanByType(type);
-  const exercises = await getExercisesByType(type);
+  const [exercises, soundEnabled] = await Promise.all([
+    getExercisesByType(type),
+    getExerciseSoundEnabled(),
+  ]);
   const completedIds = await getCompletedExerciseIds(
     userId,
     exercises.map((exercise) => exercise.id),
@@ -81,6 +85,7 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
         type={type}
         exercises={exercises}
         completedIds={[...completedIds]}
+        soundEnabled={soundEnabled}
       />
     </div>
   );

@@ -42,6 +42,11 @@ export const exerciseCompletions = pgTable(
   (table) => [unique().on(table.userId, table.exerciseId, table.completedDate)],
 );
 
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});
+
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
 export type WorkoutPlan = typeof workoutPlans.$inferSelect;
 export type Exercise = typeof exercises.$inferSelect;

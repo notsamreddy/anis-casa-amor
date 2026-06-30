@@ -1,8 +1,13 @@
 import { redirect } from "next/navigation";
 
 import { AdminExerciseManager } from "@/components/admin-exercise-manager";
+import { AdminSoundSettings } from "@/components/admin-sound-settings";
 import { isAdmin } from "@/lib/admin";
-import { getAllExercisesGroupedByPlan, getWorkoutPlans } from "@/lib/queries";
+import {
+  getAllExercisesGroupedByPlan,
+  getExerciseSoundEnabled,
+  getWorkoutPlans,
+} from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +18,10 @@ export default async function AdminPage() {
     redirect("/");
   }
 
-  const [groupedPlans, plans] = await Promise.all([
+  const [groupedPlans, plans, soundEnabled] = await Promise.all([
     getAllExercisesGroupedByPlan(),
     getWorkoutPlans(),
+    getExerciseSoundEnabled(),
   ]);
 
   return (
@@ -23,9 +29,11 @@ export default async function AdminPage() {
       <section className="space-y-2">
         <h1 className="text-2xl font-bold tracking-tight">Coach settings</h1>
         <p className="text-muted-foreground">
-          Manage the exercise list and demo video links for each workout.
+          Manage exercises, demo videos, and app preferences.
         </p>
       </section>
+
+      <AdminSoundSettings soundEnabled={soundEnabled} />
 
       <AdminExerciseManager groupedPlans={groupedPlans} plans={plans} />
     </div>

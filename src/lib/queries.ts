@@ -2,6 +2,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import {
+  appSettings,
   exerciseCompletions,
   exercises,
   workoutPlans,
@@ -9,6 +10,10 @@ import {
   type WorkoutPlan,
   type WorkoutType,
 } from "@/db/schema";
+import {
+  SETTING_KEYS,
+  parseBooleanSetting,
+} from "@/lib/settings";
 import { getTodayDateString } from "@/lib/workout-types";
 
 export async function getWorkoutPlans(): Promise<WorkoutPlan[]> {
@@ -78,4 +83,26 @@ export async function getAllExercisesGroupedByPlan() {
     plan,
     exercises: allExercises.filter((exercise) => exercise.planId === plan.id),
   }));
+}
+
+export async function getExerciseSoundEnabled(): Promise<boolean> {
+  const [row] = await getDb()
+    .select()
+    .from(appSettings)
+    .where(eq(appSettings.key, SETTING_KEYS.EXERCISE_SOUND_ENABLED))
+    .limit(1);
+
+  return parseBooleanSetting(row?.value, false);
+}
+
+export async function setExerciseSoundEnabled(enabled: boolean): Promise<void> {
+  const value = enabled ? "true" : "false";
+
+  await getDb()
+    .insert(appSettings)
+    .values({ key: SETTING_KEYS.EXERCISE_SOUND_ENABLED, value })
+    .onConflictDoUpdate({
+      target: appSettings.key,
+      set: { value },
+    });
 }

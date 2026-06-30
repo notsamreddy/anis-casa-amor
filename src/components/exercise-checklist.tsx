@@ -10,6 +10,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExerciseVideo } from "@/components/exercise-video";
 import { celebrateCheckoff, celebrateWorkoutComplete } from "@/lib/confetti";
+import {
+  playExerciseCompleteSound,
+  playWorkoutCompleteSound,
+} from "@/lib/success-sound";
 import { WORKOUT_THEME } from "@/lib/workout-types";
 import { cn } from "@/lib/utils";
 
@@ -17,12 +21,14 @@ type ExerciseChecklistProps = {
   type: WorkoutType;
   exercises: Exercise[];
   completedIds: number[];
+  soundEnabled: boolean;
 };
 
 export function ExerciseChecklist({
   type,
   exercises,
   completedIds,
+  soundEnabled,
 }: ExerciseChecklistProps) {
   const [isPending, startTransition] = useTransition();
   const completedSet = new Set(completedIds);
@@ -31,7 +37,18 @@ export function ExerciseChecklist({
   function handleToggle(exerciseId: number, checked: boolean) {
     if (checked) {
       const willFinish = completedSet.size + 1 >= exercises.length;
-      void (willFinish ? celebrateWorkoutComplete() : celebrateCheckoff());
+      if (soundEnabled) {
+        if (willFinish) {
+          playWorkoutCompleteSound();
+        } else {
+          playExerciseCompleteSound();
+        }
+      }
+      if (willFinish) {
+        void celebrateWorkoutComplete();
+      } else {
+        void celebrateCheckoff();
+      }
     }
 
     startTransition(async () => {
