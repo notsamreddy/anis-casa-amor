@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ExerciseVideo } from "@/components/exercise-video";
+import { celebrateCheckoff, celebrateWorkoutComplete } from "@/lib/confetti";
 import { WORKOUT_THEME } from "@/lib/workout-types";
 import { cn } from "@/lib/utils";
 
@@ -17,69 +18,6 @@ type ExerciseChecklistProps = {
   exercises: Exercise[];
   completedIds: number[];
 };
-
-const CONFETTI_COLORS = [
-  "#8b5cf6",
-  "#f97316",
-  "#0ea5e9",
-  "#10b981",
-  "#f43f5e",
-  "#facc15",
-];
-
-function originFromElement(el: HTMLElement | null) {
-  if (!el || typeof window === "undefined") {
-    return { x: 0.5, y: 0.6 };
-  }
-  const rect = el.getBoundingClientRect();
-  return {
-    x: (rect.left + rect.width / 2) / window.innerWidth,
-    y: (rect.top + rect.height / 2) / window.innerHeight,
-  };
-}
-
-async function fireConfetti(target: HTMLElement | null, big: boolean) {
-  if (
-    typeof window === "undefined" ||
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
-  ) {
-    return;
-  }
-
-  const confetti = (await import("canvas-confetti")).default;
-  const origin = originFromElement(target);
-
-  confetti({
-    particleCount: big ? 220 : 110,
-    spread: big ? 140 : 90,
-    startVelocity: big ? 60 : 48,
-    origin,
-    colors: CONFETTI_COLORS,
-    scalar: big ? 1.3 : 1.15,
-    gravity: 0.9,
-    ticks: big ? 260 : 200,
-    zIndex: 9999,
-    disableForReducedMotion: true,
-  });
-
-  if (big) {
-    const sideShot = (angle: number, x: number) =>
-      confetti({
-        particleCount: 120,
-        angle,
-        spread: 80,
-        startVelocity: 65,
-        origin: { x, y: 0.75 },
-        colors: CONFETTI_COLORS,
-        scalar: 1.2,
-        ticks: 260,
-        zIndex: 9999,
-        disableForReducedMotion: true,
-      });
-    setTimeout(() => sideShot(60, 0), 150);
-    setTimeout(() => sideShot(120, 1), 150);
-  }
-}
 
 export function ExerciseChecklist({
   type,
@@ -93,8 +31,7 @@ export function ExerciseChecklist({
   function handleToggle(exerciseId: number, checked: boolean) {
     if (checked) {
       const willFinish = completedSet.size + 1 >= exercises.length;
-      const target = document.getElementById(`exercise-${exerciseId}`);
-      void fireConfetti(target, willFinish);
+      void (willFinish ? celebrateWorkoutComplete() : celebrateCheckoff());
     }
 
     startTransition(async () => {
