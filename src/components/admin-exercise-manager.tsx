@@ -11,6 +11,7 @@ import {
   type ExerciseInput,
 } from "@/actions/exercises";
 import type { Exercise, WorkoutPlan } from "@/db/schema";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -248,10 +249,14 @@ export function AdminExerciseManager({
                 >
                   <div className="min-w-0 space-y-1">
                     <p className="font-medium">{exercise.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {exercise.sets} × {exercise.reps}
-                      {exercise.videoUrl ? " · has demo video" : ""}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm text-muted-foreground">
+                        {exercise.sets} × {exercise.reps}
+                      </p>
+                      {exercise.videoUrl && (
+                        <Badge variant="secondary">Video available</Badge>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex shrink-0 items-center gap-1">
