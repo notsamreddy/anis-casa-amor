@@ -5,8 +5,10 @@ import {
   appSettings,
   exerciseCompletions,
   exercises,
+  movies,
   workoutPlans,
   type Exercise,
+  type Movie,
   type WorkoutPlan,
   type WorkoutType,
 } from "@/db/schema";
@@ -14,6 +16,7 @@ import {
   SETTING_KEYS,
   parseBooleanSetting,
 } from "@/lib/settings";
+import { sortWatchlistItems } from "@/lib/media-types";
 import { getTodayDateString } from "@/lib/workout-types";
 
 export async function getWorkoutPlans(): Promise<WorkoutPlan[]> {
@@ -105,4 +108,13 @@ export async function setExerciseSoundEnabled(enabled: boolean): Promise<void> {
       target: appSettings.key,
       set: { value },
     });
+}
+
+export async function getMoviesByUserId(userId: string): Promise<Movie[]> {
+  const rows = await getDb()
+    .select()
+    .from(movies)
+    .where(eq(movies.userId, userId));
+
+  return sortWatchlistItems(rows);
 }

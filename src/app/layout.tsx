@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppHeader } from "@/components/app-header";
+import { APP_DESCRIPTION, APP_NAME } from "@/lib/brand";
 
 import "./globals.css";
 
@@ -20,8 +21,8 @@ const fontHeading = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Ani Workout Planner",
-  description: "Push / Pull / Legs workout tracker with coach demos",
+  title: APP_NAME,
+  description: APP_DESCRIPTION,
 };
 
 export const viewport: Viewport = {

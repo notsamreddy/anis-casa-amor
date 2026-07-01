@@ -1,6 +1,6 @@
-# Ani's Workout Planner
+# Ani's Casa Amor
 
-A mobile-friendly Push / Pull / Legs workout app. Pick a workout, follow your coach's plan, and check off exercises at the gym.
+A mobile-friendly personal app for gym workouts and your watchlist. Pick Push / Pull / Legs at the gym, or track movies and series to watch.
 
 ## Stack
 
@@ -11,10 +11,10 @@ A mobile-friendly Push / Pull / Legs workout app. Pick a workout, follow your co
 ## Features
 
 - Sign in / sign up with Clerk
-- Home dashboard after login
-- Gym page with Push, Pull, and Legs workout cards
-- Exercise checklist with sets/reps, daily checkoffs, and demo video links
-- Admin settings (coach only) to add, edit, delete, and reorder exercises
+- Home screen with Gym and Watchlist
+- Gym: Push, Pull, and Legs workout cards with exercise checklists
+- Watchlist: add movies or series with priority levels and check them off when watched
+- Admin settings (coach only) to manage exercises, demo videos, and sound preferences
 - Seed script with default PPL exercises
 
 ## Setup
@@ -77,17 +77,17 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Usage
 
-1. **Coach:** Sign up first, set `ADMIN_USER_ID` in `.env.local` to your Clerk user ID, restart the dev server, then open **Admin** (gear icon) to manage exercises and video URLs.
-2. **Friend:** Sign up, go to **Go to workouts**, pick Push/Pull/Legs, and check off exercises during the session.
+1. **Coach:** Sign up first, set `ADMIN_USER_ID` in `.env.local` to your Clerk user ID, restart the dev server, then open **Settings** (gear icon) to manage exercises and video URLs.
+2. **Everyone:** Sign in, pick **Gym** or **Watchlist** from the home screen.
 
 ## Project structure
 
 ```
 src/
-  app/           # Pages (home, gym, admin, auth)
-  actions/       # Server actions (completions, exercise CRUD)
+  app/           # Pages (home, gym, watchlist, admin, auth)
+  actions/       # Server actions (completions, exercises, movies)
   components/    # UI components
   db/            # Drizzle schema and connection
-  lib/           # Queries, admin helpers, workout types
+  lib/           # Queries, admin helpers, brand, types
   scripts/       # Database seed script
 ```

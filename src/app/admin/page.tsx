@@ -27,9 +27,9 @@ export default async function AdminPage() {
   return (
     <div className="space-y-6">
       <section className="space-y-2">
-        <h1 className="text-2xl font-bold tracking-tight">Coach settings</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">
-          Manage exercises, demo videos, and app preferences.
+          Manage gym exercises, demo videos, and app preferences.
         </p>
       </section>
 
