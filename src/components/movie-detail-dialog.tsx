@@ -55,9 +55,15 @@ export function MovieDetailDialog({
     setError(null);
 
     void getMediaDetails(movie.tmdbId, movie.mediaType)
-      .then((data) => {
-        setDetails(data);
-        setError(null);
+      .then((result) => {
+        if (result.ok) {
+          setDetails(result.details);
+          setError(null);
+          return;
+        }
+
+        setDetails(null);
+        setError(result.message);
       })
       .catch(() => {
         setDetails(null);

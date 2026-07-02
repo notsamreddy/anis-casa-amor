@@ -52,8 +52,8 @@ const SearchResultItem = memo(function SearchResultItem({
     <button
       type="button"
       onClick={() => onSelect(result)}
-      className={cn(
-        "flex w-full items-center gap-3 rounded-lg border p-2 text-left",
+                      className={cn(
+        "flex w-full min-h-14 items-center gap-3 rounded-lg border p-3 text-left sm:min-h-0 sm:p-2",
         isSelected
           ? "border-fuchsia-500/50 bg-fuchsia-500/10"
           : "border-transparent hover:bg-muted/50",
@@ -218,7 +218,7 @@ export function AddMovieDialog({ open, onOpenChange }: AddMovieDialogProps) {
                       type="button"
                       onClick={() => setMediaType(type)}
                       className={cn(
-                        "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium",
+                        "flex min-h-11 items-center justify-center gap-2 rounded-lg border px-3 py-3 text-base font-medium sm:min-h-0 sm:py-2.5 sm:text-sm",
                         selectedType
                           ? "border-fuchsia-500/50 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400"
                           : "border-border text-muted-foreground hover:bg-muted/50",
@@ -299,7 +299,7 @@ export function AddMovieDialog({ open, onOpenChange }: AddMovieDialogProps) {
                     type="button"
                     onClick={() => setPriority(level)}
                     className={cn(
-                      "rounded-lg border px-2 py-2.5 text-sm font-medium",
+                      "min-h-11 rounded-lg border px-2 py-3 text-base font-medium sm:min-h-0 sm:py-2.5 sm:text-sm",
                       isSelected
                         ? cn("ring-2", theme.ring, theme.chip)
                         : "border-border text-muted-foreground hover:bg-muted/50",

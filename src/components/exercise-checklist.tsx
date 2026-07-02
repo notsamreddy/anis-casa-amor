@@ -124,7 +124,7 @@ export function ExerciseChecklist({
                   id={`exercise-${exercise.id}`}
                   checked={isCompleted}
                   disabled={isPending}
-                  className="mt-0.5 size-6"
+                  className="mt-0.5 size-7 sm:size-6"
                   onCheckedChange={(checked) =>
                     handleToggle(exercise.id, checked === true)
                   }

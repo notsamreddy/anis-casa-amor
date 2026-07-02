@@ -25,7 +25,7 @@ export function WorkoutPicker() {
                   theme.accent,
                 )}
               />
-              <CardContent className="flex items-center gap-4 py-4 pl-5">
+              <CardContent className="flex items-center gap-4 py-5 pl-5 sm:py-4">
                 <div
                   className={cn(
                     "flex size-11 shrink-0 items-center justify-center rounded-xl text-white",

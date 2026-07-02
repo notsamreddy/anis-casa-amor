@@ -43,11 +43,30 @@ type TmdbSearchResponse<T> = {
 };
 
 function getApiKey() {
-  const key = process.env.TMDB_API_KEY;
+  const key = process.env.TMDB_API_KEY?.trim();
   if (!key) {
     throw new Error("TMDB_API_KEY is not set");
   }
   return key;
+}
+
+async function tmdbFetch<T>(url: URL, revalidate: number): Promise<T> {
+  const response = await fetch(url, { next: { revalidate } });
+  const data = (await response.json()) as T & {
+    success?: boolean;
+    status_code?: number;
+    status_message?: string;
+  };
+
+  if (!response.ok || data.success === false) {
+    const message = data.status_message ?? "TMDB request failed";
+    if (data.status_code === 7 || message.includes("Invalid API key")) {
+      throw new Error("TMDB_API_KEY is invalid");
+    }
+    throw new Error(message);
+  }
+
+  return data;
 }
 
 function posterUrl(path: string | null, size: "sm" | "lg" = "sm") {
@@ -112,13 +131,8 @@ export async function searchTmdb(
   url.searchParams.set("include_adult", "false");
   url.searchParams.set("language", "en-US");
 
-  const response = await fetch(url, { next: { revalidate: 3600 } });
-  if (!response.ok) {
-    throw new Error("Failed to search TMDB");
-  }
-
   if (mediaType === "movie") {
-    const data = (await response.json()) as TmdbSearchResponse<TmdbMovieResult>;
+    const data = await tmdbFetch<TmdbSearchResponse<TmdbMovieResult>>(url, 3600);
     return data.results.slice(0, 8).map((item) => ({
       tmdbId: item.id,
       title: item.title,
@@ -128,7 +142,7 @@ export async function searchTmdb(
     }));
   }
 
-  const data = (await response.json()) as TmdbSearchResponse<TmdbTvResult>;
+  const data = await tmdbFetch<TmdbSearchResponse<TmdbTvResult>>(url, 3600);
   return data.results.slice(0, 8).map((item) => ({
     tmdbId: item.id,
     title: item.name,
@@ -176,13 +190,8 @@ export async function getTmdbDetails(
   url.searchParams.set("api_key", getApiKey());
   url.searchParams.set("language", "en-US");
 
-  const response = await fetch(url, { next: { revalidate: 86400 } });
-  if (!response.ok) {
-    throw new Error("Failed to fetch TMDB details");
-  }
-
   if (mediaType === "movie") {
-    const data = (await response.json()) as TmdbMovieDetails;
+    const data = await tmdbFetch<TmdbMovieDetails>(url, 86400);
     return {
       title: data.title,
       overview: data.overview || null,
@@ -196,7 +205,7 @@ export async function getTmdbDetails(
     };
   }
 
-  const data = (await response.json()) as TmdbTvDetails;
+  const data = await tmdbFetch<TmdbTvDetails>(url, 86400);
   return {
     title: data.name,
     overview: data.overview || null,

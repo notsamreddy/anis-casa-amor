@@ -164,7 +164,7 @@ export function MovieList({ movies }: MovieListProps) {
                 type="button"
                 onClick={() => setFilterType(type)}
                 className={cn(
-                  "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                  "flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 py-3 text-base font-medium transition-colors sm:min-h-0 sm:px-3 sm:py-2.5 sm:text-sm",
                   selected
                     ? "bg-fuchsia-600 text-white"
                     : "text-muted-foreground hover:bg-muted/50",
@@ -240,7 +240,7 @@ export function MovieList({ movies }: MovieListProps) {
                       id={`movie-${movie.id}`}
                       checked={movie.completed}
                       disabled={isPending}
-                      className="mt-1 size-6 shrink-0"
+                      className="mt-0.5 size-7 shrink-0 sm:mt-1 sm:size-6"
                       onCheckedChange={(checked) =>
                         handleToggle(movie.id, checked === true)
                       }
@@ -291,7 +291,7 @@ export function MovieList({ movies }: MovieListProps) {
                                   handlePriorityChange(movie.id, level)
                                 }
                                 className={cn(
-                                  "rounded-full px-2.5 py-1 text-xs font-medium transition-all",
+                                  "rounded-full px-2 py-1 text-xs font-medium transition-all",
                                   isActive
                                     ? cn(levelTheme.chip, "ring-1", levelTheme.ring)
                                     : "text-muted-foreground hover:bg-muted/80",
