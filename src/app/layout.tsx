@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
+  appleWebApp: {
+    title: APP_NAME,
+  },
   icons: {
     icon: APP_LOGO,
     apple: APP_LOGO,
