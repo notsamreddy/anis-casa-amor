@@ -64,9 +64,8 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
       <div className="flex items-center gap-4">
         <div
           className={cn(
-            "flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg",
-            theme.gradient,
-            theme.glow,
+            "flex size-14 shrink-0 items-center justify-center rounded-2xl text-white",
+            theme.accent,
           )}
         >
           <Dumbbell className="size-7" />

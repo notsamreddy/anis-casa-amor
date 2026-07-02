@@ -61,6 +61,8 @@ export const movies = pgTable("movies", {
   mediaType: mediaTypeEnum("media_type").notNull().default("movie"),
   priority: mediaPriorityEnum("priority").notNull().default("medium"),
   completed: boolean("completed").notNull().default(false),
+  posterUrl: text("poster_url"),
+  tmdbId: integer("tmdb_id"),
 });
 
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];

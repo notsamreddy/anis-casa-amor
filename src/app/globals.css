@@ -123,13 +123,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(
-      48rem 36rem at 50% -8rem,
-      color-mix(in oklch, var(--primary) 14%, transparent),
-      transparent 70%
-    );
-    background-repeat: no-repeat;
-    background-attachment: fixed;
   }
   html {
     @apply font-sans;

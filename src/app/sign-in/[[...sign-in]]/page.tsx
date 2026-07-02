@@ -7,7 +7,7 @@ export default function SignInPage() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center gap-6 py-6">
       <div className="space-y-3 text-center">
-        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-fuchsia-600/30">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
           <LayoutGrid className="size-7" />
         </span>
         <div className="space-y-1">

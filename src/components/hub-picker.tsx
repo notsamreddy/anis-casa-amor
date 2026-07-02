@@ -10,16 +10,14 @@ const HUB_OPTIONS = [
     label: "Gym",
     description: "Track workouts and check off exercises",
     icon: Dumbbell,
-    gradient: "from-violet-600 to-indigo-600",
-    glow: "shadow-violet-600/30",
+    accent: "bg-violet-600",
   },
   {
     href: "/movies",
     label: "Watchlist",
     description: "Movies and series to watch",
     icon: Film,
-    gradient: "from-fuchsia-500 to-purple-600",
-    glow: "shadow-fuchsia-500/30",
+    accent: "bg-fuchsia-600",
   },
 ] as const;
 
@@ -31,22 +29,21 @@ export function HubPicker() {
 
         return (
           <Link key={option.href} href={option.href} className="group block">
-            <Card className="relative overflow-hidden py-0 ring-1 ring-foreground/10 transition-all duration-200 hover:-translate-y-0.5 hover:ring-foreground/20 active:scale-[0.99]">
+            <Card className="relative overflow-hidden py-0 ring-1 ring-border transition-colors duration-200 hover:border-foreground/20 hover:bg-muted/40">
               <div
                 className={cn(
-                  "absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b",
-                  option.gradient,
+                  "absolute inset-y-0 left-0 w-1",
+                  option.accent,
                 )}
               />
               <CardContent className="flex items-center gap-4 py-4 pl-5">
                 <div
                   className={cn(
-                    "flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg",
-                    option.gradient,
-                    option.glow,
+                    "flex size-11 shrink-0 items-center justify-center rounded-xl text-white",
+                    option.accent,
                   )}
                 >
-                  <Icon className="size-6" />
+                  <Icon className="size-5" />
                 </div>
 
                 <div className="min-w-0 flex-1">

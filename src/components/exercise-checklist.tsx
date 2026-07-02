@@ -84,11 +84,11 @@ export function ExerciseChecklist({
             {isPending ? "Saving…" : `${percent}%`}
           </span>
         </div>
-        <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
           <div
             className={cn(
-              "h-full rounded-full bg-gradient-to-r transition-all duration-500 ease-out",
-              theme.gradient,
+              "h-full rounded-full transition-all duration-500 ease-out",
+              theme.accent,
             )}
             style={{ width: `${percent}%` }}
           />

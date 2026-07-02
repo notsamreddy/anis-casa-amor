@@ -16,8 +16,7 @@ export const MEDIA_PRIORITY_LABELS: Record<MediaPriority, string> = {
 };
 
 type MediaTheme = {
-  gradient: string;
-  glow: string;
+  accent: string;
   chip: string;
   tint: string;
   ring: string;
@@ -25,22 +24,19 @@ type MediaTheme = {
 
 export const MEDIA_PRIORITY_THEME: Record<MediaPriority, MediaTheme> = {
   high: {
-    gradient: "from-rose-500 to-red-600",
-    glow: "shadow-rose-500/30",
+    accent: "bg-rose-500",
     chip: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
     tint: "bg-rose-500/5",
     ring: "ring-rose-500/40",
   },
   medium: {
-    gradient: "from-amber-500 to-orange-500",
-    glow: "shadow-amber-500/30",
+    accent: "bg-amber-500",
     chip: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
     tint: "bg-amber-500/5",
     ring: "ring-amber-500/40",
   },
   low: {
-    gradient: "from-sky-500 to-blue-500",
-    glow: "shadow-sky-500/30",
+    accent: "bg-sky-500",
     chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
     tint: "bg-sky-500/5",
     ring: "ring-sky-500/40",

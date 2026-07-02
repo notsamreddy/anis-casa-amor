@@ -18,22 +18,21 @@ export function WorkoutPicker() {
 
         return (
           <Link key={type} href={`/gym/${type}`} className="group block">
-            <Card className="relative overflow-hidden py-0 ring-1 ring-foreground/10 transition-all duration-200 hover:-translate-y-0.5 hover:ring-foreground/20 active:scale-[0.99]">
+            <Card className="relative overflow-hidden py-0 ring-1 ring-border transition-colors duration-200 hover:border-foreground/20 hover:bg-muted/40">
               <div
                 className={cn(
-                  "absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b",
-                  theme.gradient,
+                  "absolute inset-y-0 left-0 w-1",
+                  theme.accent,
                 )}
               />
               <CardContent className="flex items-center gap-4 py-4 pl-5">
                 <div
                   className={cn(
-                    "flex size-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-lg",
-                    theme.gradient,
-                    theme.glow,
+                    "flex size-11 shrink-0 items-center justify-center rounded-xl text-white",
+                    theme.accent,
                   )}
                 >
-                  <Dumbbell className="size-6" />
+                  <Dumbbell className="size-5" />
                 </div>
 
                 <div className="min-w-0 flex-1">

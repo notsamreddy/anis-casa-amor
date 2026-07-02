@@ -13,7 +13,7 @@ export async function AppHeader() {
     <header className="sticky top-0 z-50 border-b bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-lg items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-sm shadow-violet-600/30">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <LayoutGrid className="size-5" />
           </span>
           <span className="text-base tracking-tight">{APP_NAME}</span>

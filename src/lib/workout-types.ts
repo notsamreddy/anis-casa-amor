@@ -15,28 +15,24 @@ export const WORKOUT_DESCRIPTIONS: Record<WorkoutType, string> = {
 };
 
 type WorkoutTheme = {
-  gradient: string;
-  glow: string;
+  accent: string;
   chip: string;
   tint: string;
 };
 
 export const WORKOUT_THEME: Record<WorkoutType, WorkoutTheme> = {
   push: {
-    gradient: "from-orange-500 to-rose-500",
-    glow: "shadow-orange-500/30",
+    accent: "bg-orange-500",
     chip: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     tint: "bg-orange-500/5",
   },
   pull: {
-    gradient: "from-sky-500 to-indigo-500",
-    glow: "shadow-sky-500/30",
+    accent: "bg-sky-500",
     chip: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
     tint: "bg-sky-500/5",
   },
   legs: {
-    gradient: "from-emerald-500 to-teal-500",
-    glow: "shadow-emerald-500/30",
+    accent: "bg-emerald-500",
     chip: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     tint: "bg-emerald-500/5",
   },

@@ -11,6 +11,8 @@ export type MovieInput = {
   title: string;
   mediaType: MediaType;
   priority: MediaPriority;
+  posterUrl?: string | null;
+  tmdbId?: number | null;
 };
 
 async function requireUserId() {
@@ -36,6 +38,8 @@ export async function createMovie(input: MovieInput) {
       title,
       mediaType: input.mediaType,
       priority: input.priority,
+      posterUrl: input.posterUrl ?? null,
+      tmdbId: input.tmdbId ?? null,
     })
     .returning();
 
@@ -60,6 +64,17 @@ export async function deleteMovie(id: number) {
 
   await getDb()
     .delete(movies)
+    .where(and(eq(movies.id, id), eq(movies.userId, userId)));
+
+  revalidatePath("/movies");
+}
+
+export async function updateMoviePriority(id: number, priority: MediaPriority) {
+  const userId = await requireUserId();
+
+  await getDb()
+    .update(movies)
+    .set({ priority })
     .where(and(eq(movies.id, id), eq(movies.userId, userId)));
 
   revalidatePath("/movies");
