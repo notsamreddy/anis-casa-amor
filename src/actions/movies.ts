@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import { movies, type MediaPriority, type MediaType } from "@/db/schema";
@@ -49,33 +49,33 @@ export async function createMovie(input: MovieInput) {
 }
 
 export async function toggleMovieCompletion(id: number, completed: boolean) {
-  const userId = await requireUserId();
+  await requireUserId();
 
   await getDb()
     .update(movies)
     .set({ completed })
-    .where(and(eq(movies.id, id), eq(movies.userId, userId)));
+    .where(eq(movies.id, id));
 
   revalidatePath("/movies");
 }
 
 export async function deleteMovie(id: number) {
-  const userId = await requireUserId();
+  await requireUserId();
 
   await getDb()
     .delete(movies)
-    .where(and(eq(movies.id, id), eq(movies.userId, userId)));
+    .where(eq(movies.id, id));
 
   revalidatePath("/movies");
 }
 
 export async function updateMoviePriority(id: number, priority: MediaPriority) {
-  const userId = await requireUserId();
+  await requireUserId();
 
   await getDb()
     .update(movies)
     .set({ priority })
-    .where(and(eq(movies.id, id), eq(movies.userId, userId)));
+    .where(eq(movies.id, id));
 
   revalidatePath("/movies");
 }

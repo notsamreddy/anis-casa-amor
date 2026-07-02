@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { MovieList } from "@/components/movie-list";
 import { buttonVariants } from "@/components/ui/button";
-import { getMoviesByUserId } from "@/lib/queries";
+import { getAllMovies } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export default async function MoviesPage() {
     redirect("/sign-in");
   }
 
-  const movies = await getMoviesByUserId(userId);
+  const movies = await getAllMovies();
 
   return (
     <div className="space-y-4">

@@ -110,11 +110,8 @@ export async function setExerciseSoundEnabled(enabled: boolean): Promise<void> {
     });
 }
 
-export async function getMoviesByUserId(userId: string): Promise<Movie[]> {
-  const rows = await getDb()
-    .select()
-    .from(movies)
-    .where(eq(movies.userId, userId));
+export async function getAllMovies(): Promise<Movie[]> {
+  const rows = await getDb().select().from(movies);
 
   return sortWatchlistItems(rows);
 }
