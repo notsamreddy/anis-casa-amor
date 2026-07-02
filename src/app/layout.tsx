@@ -23,6 +23,7 @@ const fontHeading = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  applicationName: APP_NAME,
   icons: {
     icon: APP_LOGO,
     apple: APP_LOGO,
