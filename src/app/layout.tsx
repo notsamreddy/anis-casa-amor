@@ -4,7 +4,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 
 import { AppHeader } from "@/components/app-header";
-import { APP_DESCRIPTION, APP_NAME } from "@/lib/brand";
+import { APP_DESCRIPTION, APP_LOGO, APP_NAME } from "@/lib/brand";
 
 import "./globals.css";
 
@@ -23,6 +23,10 @@ const fontHeading = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
+  icons: {
+    icon: APP_LOGO,
+    apple: APP_LOGO,
+  },
 };
 
 export const viewport: Viewport = {
