@@ -3,12 +3,12 @@ export type YouTubeEmbed = {
   isShort: boolean;
 };
 
-/**
- * Parses common YouTube URL shapes (watch, youtu.be, shorts, embed) and
- * returns an embeddable URL. Shorts are flagged so the player can render
- * in a portrait aspect ratio. Returns null for anything we can't embed.
- */
-export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
+export type ParsedYouTubeUrl = {
+  videoId: string;
+  isShort: boolean;
+};
+
+function parseYouTubeUrl(rawUrl: string): ParsedYouTubeUrl | null {
   let url: URL;
   try {
     url = new URL(rawUrl.trim());
@@ -42,7 +42,21 @@ export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
     videoId = url.searchParams.get("v");
   }
 
-  if (!videoId) {
+  if (!videoId || !/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+    return null;
+  }
+
+  return { videoId, isShort };
+}
+
+/**
+ * Parses common YouTube URL shapes (watch, youtu.be, shorts, embed) and
+ * returns an embeddable URL. Shorts are flagged so the player can render
+ * in a portrait aspect ratio. Returns null for anything we can't embed.
+ */
+export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
+  const parsed = parseYouTubeUrl(rawUrl);
+  if (!parsed) {
     return null;
   }
 
@@ -53,7 +67,15 @@ export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
   });
 
   return {
-    embedUrl: `https://www.youtube.com/embed/${videoId}?${params.toString()}`,
-    isShort,
+    embedUrl: `https://www.youtube.com/embed/${parsed.videoId}?${params.toString()}`,
+    isShort: parsed.isShort,
   };
+}
+
+export function parseYouTubeVideoId(rawUrl: string): string | null {
+  return parseYouTubeUrl(rawUrl)?.videoId ?? null;
+}
+
+export function isValidYouTubeUrl(rawUrl: string): boolean {
+  return parseYouTubeVideoId(rawUrl) !== null;
 }
