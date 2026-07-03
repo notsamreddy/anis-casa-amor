@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, gte, lte } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import { scheduleEvents } from "@/db/schema";
@@ -99,7 +99,6 @@ export async function saveScheduleWeek(
   const weekEnd = addDays(weekStart, 6);
   const db = getDb();
   const weekFilter = and(
-    eq(scheduleEvents.userId, userId),
     gte(scheduleEvents.eventDate, weekStart),
     lte(scheduleEvents.eventDate, weekEnd),
   );
@@ -125,14 +124,13 @@ export async function saveScheduleWeek(
 }
 
 export async function clearScheduleWeek(weekStart: string) {
-  const userId = await requireUserId();
+  await requireUserId();
   const weekEnd = addDays(weekStart, 6);
 
   await getDb()
     .delete(scheduleEvents)
     .where(
       and(
-        eq(scheduleEvents.userId, userId),
         gte(scheduleEvents.eventDate, weekStart),
         lte(scheduleEvents.eventDate, weekEnd),
       ),

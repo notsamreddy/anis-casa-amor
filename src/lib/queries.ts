@@ -119,7 +119,6 @@ export async function getAllMovies(): Promise<Movie[]> {
 }
 
 export async function getScheduleEventsForWeek(
-  userId: string,
   weekStart: string,
   weekEnd: string,
 ): Promise<ScheduleEvent[]> {
@@ -128,7 +127,6 @@ export async function getScheduleEventsForWeek(
     .from(scheduleEvents)
     .where(
       and(
-        eq(scheduleEvents.userId, userId),
         gte(scheduleEvents.eventDate, weekStart),
         lte(scheduleEvents.eventDate, weekEnd),
       ),

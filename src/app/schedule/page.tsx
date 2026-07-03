@@ -26,7 +26,7 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
     ? getWeekMonday(new Date(`${params.week}T12:00:00`))
     : getWeekMonday();
   const weekEnd = addDays(weekStart, 6);
-  const events = await getScheduleEventsForWeek(userId, weekStart, weekEnd);
+  const events = await getScheduleEventsForWeek(weekStart, weekEnd);
 
   return (
     <div className="space-y-4">
