@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, Dumbbell, Film } from "lucide-react";
+import { CalendarDays, ChevronRight, Dumbbell, Film } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,13 @@ const HUB_OPTIONS = [
     description: "Movies and series to watch",
     icon: Film,
     accent: "bg-fuchsia-600",
+  },
+  {
+    href: "/schedule",
+    label: "Schedule",
+    description: "Import work shifts from a screenshot",
+    icon: CalendarDays,
+    accent: "bg-sky-600",
   },
 ] as const;
 

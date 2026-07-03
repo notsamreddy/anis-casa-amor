@@ -16,6 +16,10 @@ export const mediaPriorityEnum = pgEnum("media_priority", [
   "medium",
   "low",
 ]);
+export const scheduleEventTypeEnum = pgEnum("schedule_event_type", [
+  "shift",
+  "time_off",
+]);
 
 export const workoutPlans = pgTable("workout_plans", {
   id: serial("id").primaryKey(),
@@ -65,10 +69,24 @@ export const movies = pgTable("movies", {
   tmdbId: integer("tmdb_id"),
 });
 
+export const scheduleEvents = pgTable("schedule_events", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  eventDate: date("event_date").notNull(),
+  type: scheduleEventTypeEnum("type").notNull(),
+  startTime: text("start_time"),
+  endTime: text("end_time"),
+  location: text("location"),
+  allDay: boolean("all_day").notNull().default(false),
+  hasConflict: boolean("has_conflict").notNull().default(false),
+});
+
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
 export type MediaType = (typeof mediaTypeEnum.enumValues)[number];
 export type MediaPriority = (typeof mediaPriorityEnum.enumValues)[number];
+export type ScheduleEventType = (typeof scheduleEventTypeEnum.enumValues)[number];
 export type WorkoutPlan = typeof workoutPlans.$inferSelect;
 export type Exercise = typeof exercises.$inferSelect;
 export type ExerciseCompletion = typeof exerciseCompletions.$inferSelect;
 export type Movie = typeof movies.$inferSelect;
+export type ScheduleEvent = typeof scheduleEvents.$inferSelect;
