@@ -28,7 +28,7 @@ const HUB_OPTIONS = [
   },
   {
     href: "/converter",
-    label: "YT to MP3",
+    label: "Music Downloader",
     description: "Download audio from YouTube links",
     icon: Music2,
     accent: "bg-rose-600",

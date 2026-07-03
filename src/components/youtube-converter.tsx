@@ -131,7 +131,7 @@ export function YouTubeConverter() {
   return (
     <div className="space-y-4">
       <section className="space-y-1.5">
-        <h1 className="text-2xl font-bold tracking-tight">YouTube to MP3</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Music Downloader</h1>
         <p className="text-sm text-muted-foreground">
           Paste a link and the download starts automatically.
         </p>
@@ -141,7 +141,7 @@ export function YouTubeConverter() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Music2 className="size-4 text-rose-500" />
-            Audio downloader
+            Music Downloader
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
