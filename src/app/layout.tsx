@@ -24,8 +24,14 @@ export const metadata: Metadata = {
   title: APP_NAME,
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
     title: APP_NAME,
+  },
+  formatDetection: {
+    telephone: false,
   },
   icons: {
     icon: APP_LOGO,
