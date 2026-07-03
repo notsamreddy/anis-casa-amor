@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Dumbbell, Film, Music2 } from "lucide-react";
+import { CalendarDays, ChefHat, ChevronRight, Dumbbell, Film, Music2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,13 @@ const HUB_OPTIONS = [
     description: "Movies and series to watch",
     icon: Film,
     accent: "bg-fuchsia-600",
+  },
+  {
+    href: "/recipes",
+    label: "Recipes",
+    description: "Save YouTube Shorts and pick one at random",
+    icon: ChefHat,
+    accent: "bg-amber-600",
   },
   {
     href: "/schedule",

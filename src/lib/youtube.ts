@@ -79,6 +79,32 @@ export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
   };
 }
 
+export function getYouTubeThumbnailUrl(videoId: string): string {
+  return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+export async function fetchYouTubeTitle(videoUrl: string): Promise<string | null> {
+  if (!extractYouTubeVideoId(videoUrl)) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(
+      `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`,
+      { next: { revalidate: 86400 } },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as { title?: string };
+    return typeof data.title === "string" ? data.title : null;
+  } catch {
+    return null;
+  }
+}
+
 export function formatYouTubeDuration(seconds: number | undefined): string | null {
   if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) {
     return null;

@@ -81,6 +81,14 @@ export const scheduleEvents = pgTable("schedule_events", {
   hasConflict: boolean("has_conflict").notNull().default(false),
 });
 
+export const recipeVideos = pgTable("recipe_videos", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  title: text("title").notNull(),
+  videoUrl: text("video_url").notNull(),
+  notes: text("notes"),
+});
+
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
 export type MediaType = (typeof mediaTypeEnum.enumValues)[number];
 export type MediaPriority = (typeof mediaPriorityEnum.enumValues)[number];
@@ -90,3 +98,4 @@ export type Exercise = typeof exercises.$inferSelect;
 export type ExerciseCompletion = typeof exerciseCompletions.$inferSelect;
 export type Movie = typeof movies.$inferSelect;
 export type ScheduleEvent = typeof scheduleEvents.$inferSelect;
+export type RecipeVideo = typeof recipeVideos.$inferSelect;

@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, lte } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import {
@@ -6,10 +6,12 @@ import {
   exerciseCompletions,
   exercises,
   movies,
+  recipeVideos,
   scheduleEvents,
   workoutPlans,
   type Exercise,
   type Movie,
+  type RecipeVideo,
   type ScheduleEvent,
   type WorkoutPlan,
   type WorkoutType,
@@ -116,6 +118,13 @@ export async function getAllMovies(): Promise<Movie[]> {
   const rows = await getDb().select().from(movies);
 
   return sortWatchlistItems(rows);
+}
+
+export async function getAllRecipeVideos(): Promise<RecipeVideo[]> {
+  return getDb()
+    .select()
+    .from(recipeVideos)
+    .orderBy(desc(recipeVideos.id));
 }
 
 export async function getScheduleEventsForWeek(
