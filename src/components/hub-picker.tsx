@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Dumbbell, Film } from "lucide-react";
+import { CalendarDays, ChevronRight, Dumbbell, Film, Music2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,13 @@ const HUB_OPTIONS = [
     description: "Import work shifts from a screenshot",
     icon: CalendarDays,
     accent: "bg-sky-600",
+  },
+  {
+    href: "/converter",
+    label: "YT to MP3",
+    description: "Download audio from YouTube links",
+    icon: Music2,
+    accent: "bg-rose-600",
   },
 ] as const;
 

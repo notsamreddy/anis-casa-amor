@@ -3,12 +3,12 @@ export type YouTubeEmbed = {
   isShort: boolean;
 };
 
-/**
- * Parses common YouTube URL shapes (watch, youtu.be, shorts, embed) and
- * returns an embeddable URL. Shorts are flagged so the player can render
- * in a portrait aspect ratio. Returns null for anything we can't embed.
- */
-export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
+export type YouTubeVideoRef = {
+  videoId: string;
+  isShort: boolean;
+};
+
+function parseYouTubeUrl(rawUrl: string): YouTubeVideoRef | null {
   let url: URL;
   try {
     url = new URL(rawUrl.trim());
@@ -46,6 +46,27 @@ export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
     return null;
   }
 
+  return { videoId, isShort };
+}
+
+/** Returns the 11-char video id from common YouTube URL shapes, or null. */
+export function extractYouTubeVideoId(rawUrl: string): string | null {
+  return parseYouTubeUrl(rawUrl)?.videoId ?? null;
+}
+
+/**
+ * Parses common YouTube URL shapes (watch, youtu.be, shorts, embed) and
+ * returns an embeddable URL. Shorts are flagged so the player can render
+ * in a portrait aspect ratio. Returns null for anything we can't embed.
+ */
+export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
+  const parsed = parseYouTubeUrl(rawUrl);
+  if (!parsed) {
+    return null;
+  }
+
+  const { videoId, isShort } = parsed;
+
   const params = new URLSearchParams({
     rel: "0",
     playsinline: "1",
@@ -56,4 +77,21 @@ export function getYouTubeEmbed(rawUrl: string): YouTubeEmbed | null {
     embedUrl: `https://www.youtube.com/embed/${videoId}?${params.toString()}`,
     isShort,
   };
+}
+
+export function formatYouTubeDuration(seconds: number | undefined): string | null {
+  if (seconds == null || !Number.isFinite(seconds) || seconds <= 0) {
+    return null;
+  }
+
+  const total = Math.floor(seconds);
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const secs = total % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
+
+  return `${minutes}:${String(secs).padStart(2, "0")}`;
 }
