@@ -1,14 +1,27 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useTransition } from "react";
-import { ChefHat, ExternalLink, Play, Plus, Shuffle, Trash2 } from "lucide-react";
+import { useMemo, useState, useTransition } from "react";
+import {
+  BookOpen,
+  ChefHat,
+  Play,
+  Plus,
+  Shuffle,
+  Trash2,
+} from "lucide-react";
 
 import { AddRecipeDialog } from "@/components/add-recipe-dialog";
-import { deleteRecipeVideo } from "@/actions/recipes";
+import { RecipeDetailDialog } from "@/components/recipe-detail-dialog";
+import {
+  deleteRecipeVideo,
+  toggleRecipeMade,
+  updateRecipeRating,
+} from "@/actions/recipes";
 import type { RecipeVideo } from "@/db/schema";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { RecipeRatingPicker } from "@/components/recipe-rating";
+import type { RecipeRating } from "@/lib/recipe-types";
 import {
   extractYouTubeVideoId,
   getYouTubeEmbed,
@@ -136,7 +151,6 @@ function RecipeVideoPlayer({
                 className="inline-flex items-center gap-2 text-sm text-primary"
               >
                 Open on YouTube
-                <ExternalLink className="size-4" />
               </a>
             )}
           </>
@@ -152,16 +166,42 @@ export function RecipeList({ recipes }: RecipeListProps) {
   const [recipeToDelete, setRecipeToDelete] = useState<RecipeVideo | null>(null);
   const [randomPick, setRandomPick] = useState<RecipeVideo | null>(null);
   const [watchRecipe, setWatchRecipe] = useState<RecipeVideo | null>(null);
+  const [detailRecipe, setDetailRecipe] = useState<RecipeVideo | null>(null);
+
+  const unmadeRecipes = useMemo(
+    () => recipes.filter((recipe) => !recipe.made),
+    [recipes],
+  );
+
+  const madeCount = recipes.filter((recipe) => recipe.made).length;
+  const total = recipes.length;
+  const percent = total > 0 ? Math.round((madeCount / total) * 100) : 0;
+  const randomPool = unmadeRecipes.length > 0 ? unmadeRecipes : recipes;
+  const activeDetailRecipe = detailRecipe
+    ? recipes.find((recipe) => recipe.id === detailRecipe.id) ?? detailRecipe
+    : null;
+
+  function handleToggleMade(id: number, checked: boolean) {
+    startTransition(async () => {
+      await toggleRecipeMade(id, checked);
+    });
+  }
+
+  function handleRatingChange(id: number, rating: RecipeRating | null) {
+    startTransition(async () => {
+      await updateRecipeRating(id, rating);
+    });
+  }
 
   function handlePickRandom() {
-    const pick = pickRandomExcluding(recipes);
+    const pick = pickRandomExcluding(randomPool);
     if (pick) {
       setRandomPick(pick);
     }
   }
 
   function handlePickAgain() {
-    const pick = pickRandomExcluding(recipes, randomPick?.id);
+    const pick = pickRandomExcluding(randomPool, randomPick?.id);
     if (pick) {
       setRandomPick(pick);
     }
@@ -177,6 +217,9 @@ export function RecipeList({ recipes }: RecipeListProps) {
       setRecipeToDelete(null);
       if (randomPick?.id === recipeToDelete.id) {
         setRandomPick(null);
+      }
+      if (detailRecipe?.id === recipeToDelete.id) {
+        setDetailRecipe(null);
       }
     });
   }
@@ -225,83 +268,148 @@ export function RecipeList({ recipes }: RecipeListProps) {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
-            {recipes.length} recipe{recipes.length === 1 ? "" : "s"} saved
-          </p>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                {madeCount} of {total} made
+              </span>
+              <span className="tabular-nums text-muted-foreground">
+                {isPending ? "Saving…" : `${percent}%`}
+              </span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-amber-600 transition-all duration-500 ease-out"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
 
-          {recipes.map((recipe) => {
-            const isRandomHighlight = randomPick?.id === recipe.id;
+          <div className="space-y-3">
+            {recipes.map((recipe) => {
+              const isRandomHighlight = randomPick?.id === recipe.id;
 
-            return (
-              <Card
-                key={recipe.id}
-                className={cn(
-                  "relative overflow-hidden py-0 transition-colors",
-                  isRandomHighlight && "ring-2 ring-amber-500/50",
-                )}
-              >
-                <div className="absolute inset-y-0 left-0 w-1 bg-amber-600" />
-                <CardContent className="flex items-start gap-3.5 p-4 pl-5">
-                  <button
-                    type="button"
-                    onClick={() => setWatchRecipe(recipe)}
-                    className="shrink-0 hover:opacity-90"
-                  >
-                    <RecipeThumbnail
-                      title={recipe.title}
-                      videoUrl={recipe.videoUrl}
-                      className="size-16 sm:size-14"
+              return (
+                <Card
+                  key={recipe.id}
+                  className={cn(
+                    "relative overflow-hidden py-0 transition-colors",
+                    recipe.made && "bg-amber-500/5",
+                    isRandomHighlight && "ring-2 ring-amber-500/50",
+                  )}
+                >
+                  <div className="absolute inset-y-0 left-0 w-1 bg-amber-600" />
+                  <CardContent className="flex items-start gap-3.5 p-4 pl-5">
+                    <Checkbox
+                      id={`recipe-made-${recipe.id}`}
+                      checked={recipe.made}
+                      disabled={isPending}
+                      className="mt-0.5 size-7 shrink-0 sm:mt-1 sm:size-6"
+                      onCheckedChange={(checked) =>
+                        handleToggleMade(recipe.id, checked === true)
+                      }
                     />
-                  </button>
 
-                  <div className="min-w-0 flex-1 space-y-1.5">
                     <button
                       type="button"
-                      onClick={() => setWatchRecipe(recipe)}
-                      className="w-full text-left hover:opacity-90"
+                      onClick={() => setDetailRecipe(recipe)}
+                      className="shrink-0 hover:opacity-90"
                     >
-                      <p className="text-base font-semibold tracking-tight">
-                        {recipe.title}
-                      </p>
+                      <RecipeThumbnail
+                        title={recipe.title}
+                        videoUrl={recipe.videoUrl}
+                        className="size-16 sm:size-14"
+                      />
                     </button>
 
-                    {recipe.notes && (
-                      <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {recipe.notes}
-                      </p>
-                    )}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setDetailRecipe(recipe)}
+                        className="w-full text-left hover:opacity-90"
+                      >
+                        <p
+                          className={cn(
+                            "text-base font-semibold tracking-tight transition-colors",
+                            recipe.made && "text-muted-foreground line-through",
+                          )}
+                        >
+                          {recipe.title}
+                        </p>
+                      </button>
+
+                      {recipe.notes && (
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {recipe.notes}
+                        </p>
+                      )}
+
+                      {recipe.made && (
+                        <RecipeRatingPicker
+                          value={recipe.rating}
+                          onChange={(rating) =>
+                            handleRatingChange(recipe.id, rating)
+                          }
+                          disabled={isPending}
+                          size="sm"
+                        />
+                      )}
+
+                      <div className="flex flex-wrap gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="-ml-2 h-8 px-2 text-amber-600 hover:text-amber-600"
+                          onClick={() => setWatchRecipe(recipe)}
+                        >
+                          <Play className="size-3.5 fill-current" />
+                          Watch
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={() => setDetailRecipe(recipe)}
+                        >
+                          <BookOpen className="size-3.5" />
+                          {recipe.recipeText ? "View recipe" : "Generate recipe"}
+                        </Button>
+                      </div>
+                    </div>
 
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      className="-ml-2 h-8 px-2 text-amber-600 hover:text-amber-600"
-                      onClick={() => setWatchRecipe(recipe)}
+                      size="icon-sm"
+                      disabled={isPending}
+                      aria-label={`Remove ${recipe.title}`}
+                      onClick={() => setRecipeToDelete(recipe)}
                     >
-                      <Play className="size-3.5 fill-current" />
-                      Watch
+                      <Trash2 className="size-4 text-muted-foreground" />
                     </Button>
-                  </div>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    disabled={isPending}
-                    aria-label={`Remove ${recipe.title}`}
-                    onClick={() => setRecipeToDelete(recipe)}
-                  >
-                    <Trash2 className="size-4 text-muted-foreground" />
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       )}
 
       <AddRecipeDialog open={addOpen} onOpenChange={setAddOpen} />
+
+      <RecipeDetailDialog
+        recipe={activeDetailRecipe}
+        open={detailRecipe !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailRecipe(null);
+          }
+        }}
+        onWatchVideo={setWatchRecipe}
+      />
 
       <RecipeVideoPlayer
         recipe={watchRecipe}
@@ -325,7 +433,9 @@ export function RecipeList({ recipes }: RecipeListProps) {
           <DialogHeader className="border-b px-4 py-4 text-center">
             <DialogTitle>What&apos;s for dinner?</DialogTitle>
             <DialogDescription>
-              A random recipe from your saved videos
+              {unmadeRecipes.length > 0
+                ? "A random recipe you haven't made yet"
+                : "A random recipe from your collection"}
             </DialogDescription>
           </DialogHeader>
 
@@ -345,6 +455,11 @@ export function RecipeList({ recipes }: RecipeListProps) {
                     {randomPick.notes}
                   </p>
                 )}
+                {randomPick.recipeText && (
+                  <p className="text-xs text-amber-600">
+                    Written recipe available
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -361,12 +476,25 @@ export function RecipeList({ recipes }: RecipeListProps) {
               <Button
                 type="button"
                 variant="outline"
-                disabled={recipes.length <= 1}
+                disabled={randomPool.length <= 1}
                 onClick={handlePickAgain}
               >
                 <Shuffle className="size-4" />
                 Pick again
               </Button>
+              {randomPick?.recipeText && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setDetailRecipe(randomPick);
+                    setRandomPick(null);
+                  }}
+                >
+                  <BookOpen className="size-4" />
+                  Read recipe
+                </Button>
+              )}
               {randomPick && (
                 <Button
                   type="button"

@@ -87,6 +87,9 @@ export const recipeVideos = pgTable("recipe_videos", {
   title: text("title").notNull(),
   videoUrl: text("video_url").notNull(),
   notes: text("notes"),
+  made: boolean("made").notNull().default(false),
+  rating: integer("rating"),
+  recipeText: text("recipe_text"),
 });
 
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];

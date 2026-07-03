@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import { recipeVideos } from "@/db/schema";
+import { generateRecipeFromVideo } from "@/lib/recipe-generation";
+import { isRecipeRating } from "@/lib/recipe-types";
 import {
   extractYouTubeVideoId,
   fetchYouTubeTitle,
@@ -72,6 +74,99 @@ export async function createRecipeVideo(input: RecipeInput) {
   revalidatePath("/recipes");
 
   return recipe;
+}
+
+export async function toggleRecipeMade(id: number, made: boolean) {
+  await requireUserId();
+
+  await getDb()
+    .update(recipeVideos)
+    .set(made ? { made: true } : { made: false, rating: null })
+    .where(eq(recipeVideos.id, id));
+
+  revalidatePath("/recipes");
+}
+
+export async function updateRecipeRating(
+  id: number,
+  rating: number | null,
+): Promise<{ ok: true } | { ok: false; message: string }> {
+  await requireUserId();
+
+  if (rating !== null && !isRecipeRating(rating)) {
+    return { ok: false, message: "Rating must be between 1 and 5" };
+  }
+
+  const [recipe] = await getDb()
+    .select({ made: recipeVideos.made })
+    .from(recipeVideos)
+    .where(eq(recipeVideos.id, id))
+    .limit(1);
+
+  if (!recipe) {
+    return { ok: false, message: "Recipe not found" };
+  }
+
+  if (!recipe.made) {
+    return { ok: false, message: "Mark this recipe as made before rating it" };
+  }
+
+  await getDb()
+    .update(recipeVideos)
+    .set({ rating })
+    .where(eq(recipeVideos.id, id));
+
+  revalidatePath("/recipes");
+
+  return { ok: true };
+}
+
+export async function generateRecipeText(
+  id: number,
+  options?: { regenerate?: boolean },
+): Promise<
+  | { ok: true; recipeText: string }
+  | { ok: false; message: string }
+> {
+  await requireUserId();
+
+  const [recipe] = await getDb()
+    .select()
+    .from(recipeVideos)
+    .where(eq(recipeVideos.id, id))
+    .limit(1);
+
+  if (!recipe) {
+    return { ok: false, message: "Recipe not found" };
+  }
+
+  if (recipe.recipeText && !options?.regenerate) {
+    return { ok: true, recipeText: recipe.recipeText };
+  }
+
+  try {
+    const recipeText = await generateRecipeFromVideo(
+      recipe.videoUrl,
+      recipe.title,
+    );
+
+    await getDb()
+      .update(recipeVideos)
+      .set({ recipeText })
+      .where(eq(recipeVideos.id, id));
+
+    revalidatePath("/recipes");
+
+    return { ok: true, recipeText };
+  } catch (error) {
+    return {
+      ok: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Could not generate a recipe from this video",
+    };
+  }
 }
 
 export async function deleteRecipeVideo(id: number) {
