@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { Loader2, Music2 } from "lucide-react";
+import { ClipboardPaste, Loader2, Music2 } from "lucide-react";
 
 import { previewYouTubeAudio } from "@/actions/converter";
 import type { YouTubeAudioInfo } from "@/lib/converter-service";
 import { extractYouTubeVideoId } from "@/lib/youtube";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 function parseFilenameFromDisposition(header: string | null): string | null {
   if (!header) {
@@ -25,41 +24,12 @@ function parseFilenameFromDisposition(header: string | null): string | null {
 }
 
 export function YouTubeConverter() {
-  const [url, setUrl] = useState("");
   const [preview, setPreview] = useState<YouTubeAudioInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [lastDownloaded, setLastDownloaded] = useState<string | null>(null);
   const [isPreviewPending, startPreviewTransition] = useTransition();
   const requestId = useRef(0);
-
-  const isBusy = isPreviewPending || isDownloading;
-
-  useEffect(() => {
-    const trimmed = url.trim();
-    const videoId = extractYouTubeVideoId(trimmed);
-
-    if (!trimmed || !videoId) {
-      setPreview(null);
-      if (!trimmed) {
-        setError(null);
-      }
-      return;
-    }
-
-    if (videoId === lastDownloaded) {
-      return;
-    }
-
-    const currentRequest = ++requestId.current;
-    const timer = window.setTimeout(() => {
-      void startDownload(trimmed, currentRequest);
-    }, 400);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [url, lastDownloaded]);
+  const isBusy = isDownloading || isPreviewPending;
 
   async function startDownload(trimmed: string, currentRequest: number) {
     setIsDownloading(true);
@@ -106,11 +76,6 @@ export function YouTubeConverter() {
       anchor.download = filename;
       anchor.click();
       URL.revokeObjectURL(blobUrl);
-
-      const videoId = extractYouTubeVideoId(trimmed);
-      setLastDownloaded(videoId);
-      setUrl("");
-      setPreview(null);
     } catch (downloadError) {
       if (currentRequest !== requestId.current) {
         return;
@@ -128,12 +93,34 @@ export function YouTubeConverter() {
     }
   }
 
+  async function handlePasteClick() {
+    try {
+      const text = await navigator.clipboard.readText();
+      const trimmed = text.trim();
+      if (!trimmed) {
+        setError("Clipboard is empty.");
+        return;
+      }
+
+      if (!extractYouTubeVideoId(trimmed)) {
+        setError("Clipboard does not contain a valid YouTube link.");
+        return;
+      }
+
+      setError(null);
+      const currentRequest = ++requestId.current;
+      void startDownload(trimmed, currentRequest);
+    } catch {
+      setError("Clipboard paste failed. Paste the link manually.");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <section className="space-y-1.5">
         <h1 className="text-2xl font-bold tracking-tight">Music Downloader</h1>
         <p className="text-sm text-muted-foreground">
-          Paste a link and the download starts automatically.
+          Tap once to paste from clipboard and download instantly.
         </p>
       </section>
 
@@ -145,23 +132,20 @@ export function YouTubeConverter() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="youtube-url">YouTube URL</Label>
-            <Input
-              id="youtube-url"
-              type="url"
-              inputMode="url"
-              autoComplete="off"
-              placeholder="https://youtube.com/watch?v=..."
-              value={url}
-              onChange={(event) => {
-                setLastDownloaded(null);
-                setUrl(event.target.value);
-              }}
-              aria-invalid={Boolean(error)}
-              disabled={isDownloading}
-            />
-          </div>
+          <Button
+            type="button"
+            className="w-full"
+            size="lg"
+            onClick={handlePasteClick}
+            disabled={isBusy}
+          >
+            {isBusy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <ClipboardPaste className="size-4" />
+            )}
+            Paste & Download
+          </Button>
 
           {isBusy ? (
             <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-3">
