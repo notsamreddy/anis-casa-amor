@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, ChefHat, ChevronRight, Dumbbell, Film, Music2 } from "lucide-react";
+import { CalendarDays, ChefHat, ChevronRight, Disc3, Dumbbell, Film, Music2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -39,6 +39,13 @@ const HUB_OPTIONS = [
     description: "Download audio from YouTube links",
     icon: Music2,
     accent: "bg-rose-600",
+  },
+  {
+    href: "/spotify",
+    label: "Spotify Swipe",
+    description: "Swipe through playlists and remove songs you do not want",
+    icon: Disc3,
+    accent: "bg-emerald-600",
   },
 ] as const;
 

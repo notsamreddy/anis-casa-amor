@@ -9,6 +9,7 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   images: {
     remotePatterns: [
       {
@@ -20,6 +21,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "img.youtube.com",
         pathname: "/vi/**",
+      },
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+        pathname: "/image/**",
       },
     ],
   },

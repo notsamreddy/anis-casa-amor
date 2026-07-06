@@ -92,6 +92,14 @@ export const recipeVideos = pgTable("recipe_videos", {
   recipeText: text("recipe_text"),
 });
 
+export const spotifyTokens = pgTable("spotify_tokens", {
+  userId: text("user_id").primaryKey(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+  scope: text("scope"),
+});
+
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
 export type MediaType = (typeof mediaTypeEnum.enumValues)[number];
 export type MediaPriority = (typeof mediaPriorityEnum.enumValues)[number];
@@ -102,3 +110,4 @@ export type ExerciseCompletion = typeof exerciseCompletions.$inferSelect;
 export type Movie = typeof movies.$inferSelect;
 export type ScheduleEvent = typeof scheduleEvents.$inferSelect;
 export type RecipeVideo = typeof recipeVideos.$inferSelect;
+export type SpotifyToken = typeof spotifyTokens.$inferSelect;
