@@ -43,7 +43,7 @@ const HUB_OPTIONS = [
   {
     href: "/spotify",
     label: "Spotify Swipe",
-    description: "Swipe through playlists and remove songs you do not want",
+    description: "Swipe to clean up playlists",
     icon: Disc3,
     accent: "bg-emerald-600",
   },
@@ -51,31 +51,35 @@ const HUB_OPTIONS = [
 
 export function HubPicker() {
   return (
-    <div className="grid gap-3">
+    <div className="grid w-full min-w-0 gap-2.5 sm:gap-3">
       {HUB_OPTIONS.map((option) => {
         const Icon = option.icon;
 
         return (
-          <Link key={option.href} href={option.href} className="group block">
-            <Card className="relative overflow-hidden py-0 ring-1 ring-border transition-colors duration-200 hover:border-foreground/20 hover:bg-muted/40">
+          <Link
+            key={option.href}
+            href={option.href}
+            className="group block w-full min-w-0 max-w-full"
+          >
+            <Card className="relative w-full min-w-0 overflow-hidden py-0 ring-1 ring-border transition-colors duration-200 hover:border-foreground/20 hover:bg-muted/40">
               <div
                 className={cn(
                   "absolute inset-y-0 left-0 w-1",
                   option.accent,
                 )}
               />
-              <CardContent className="flex items-center gap-4 py-5 pl-5 sm:py-4">
+              <CardContent className="flex min-w-0 items-center gap-3 py-4 pl-4 pr-3 sm:gap-4 sm:py-4 sm:pl-5 sm:pr-4">
                 <div
                   className={cn(
-                    "flex size-11 shrink-0 items-center justify-center rounded-xl text-white",
+                    "flex size-10 shrink-0 items-center justify-center rounded-xl text-white sm:size-11",
                     option.accent,
                   )}
                 >
                   <Icon className="size-5" />
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <p className="text-lg font-semibold tracking-tight">
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <p className="truncate text-base font-semibold tracking-tight sm:text-lg">
                     {option.label}
                   </p>
                   <p className="truncate text-sm text-muted-foreground">
@@ -83,7 +87,7 @@ export function HubPicker() {
                   </p>
                 </div>
 
-                <ChevronRight className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-1" />
+                <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 sm:size-5" />
               </CardContent>
             </Card>
           </Link>

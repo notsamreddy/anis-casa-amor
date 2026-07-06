@@ -61,7 +61,7 @@ export default function RootLayout({
       <body className="flex min-h-dvh flex-col">
         <ClerkProvider dynamic appearance={{ theme: dark }}>
           <AppHeader />
-          <main className="mx-auto w-full max-w-lg flex-1 px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <main className="mx-auto w-full min-w-0 max-w-lg flex-1 overflow-x-hidden px-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
             {children}
           </main>
         </ClerkProvider>
