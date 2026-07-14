@@ -74,6 +74,12 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run db:push` | Push schema to Neon |
 | `npm run db:seed` | Seed default PPL exercises |
 | `npm run db:studio` | Open Drizzle Studio |
+| `npm run bot:register` | Register Discord slash commands |
+| `npm run bot:dev` | Run the Discord bot |
+
+## Discord bot
+
+Slash commands for gym, watchlist, recipes, and schedule live in `discord-bot/`. See [discord-bot/README.md](discord-bot/README.md) for Discord Developer Portal setup and `DISCORD_*` env vars.
 
 ## Usage
 

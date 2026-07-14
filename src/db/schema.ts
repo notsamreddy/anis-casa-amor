@@ -100,6 +100,18 @@ export const spotifyTokens = pgTable("spotify_tokens", {
   scope: text("scope"),
 });
 
+export const discordLinks = pgTable("discord_links", {
+  discordUserId: text("discord_user_id").primaryKey(),
+  clerkUserId: text("clerk_user_id").notNull(),
+  linkedAt: integer("linked_at").notNull(),
+});
+
+export const discordLinkCodes = pgTable("discord_link_codes", {
+  code: text("code").primaryKey(),
+  discordUserId: text("discord_user_id").notNull(),
+  expiresAt: integer("expires_at").notNull(),
+});
+
 export type WorkoutType = (typeof workoutTypeEnum.enumValues)[number];
 export type MediaType = (typeof mediaTypeEnum.enumValues)[number];
 export type MediaPriority = (typeof mediaPriorityEnum.enumValues)[number];
@@ -111,3 +123,5 @@ export type Movie = typeof movies.$inferSelect;
 export type ScheduleEvent = typeof scheduleEvents.$inferSelect;
 export type RecipeVideo = typeof recipeVideos.$inferSelect;
 export type SpotifyToken = typeof spotifyTokens.$inferSelect;
+export type DiscordLink = typeof discordLinks.$inferSelect;
+export type DiscordLinkCode = typeof discordLinkCodes.$inferSelect;

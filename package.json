@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:push": "drizzle-kit push --force",
     "db:seed": "tsx src/scripts/seed.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "bot:register": "tsx discord-bot/register-commands.ts",
+    "bot:dev": "tsx discord-bot/index.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -20,6 +22,7 @@
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "discord.js": "^14.26.5",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.22.0",
     "next": "16.2.9",
@@ -33,7 +36,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.43",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.4.2",
