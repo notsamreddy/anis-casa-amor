@@ -167,11 +167,16 @@ async function fetchVideoInfo(rawUrl) {
 }
 
 async function downloadMp3(rawUrl) {
+  const videoId = extractYouTubeVideoId(rawUrl);
+  if (!videoId) {
+    throw new Error("That doesn't look like a valid YouTube link.");
+  }
+
   const workDir = await mkdtemp(join(tmpdir(), "converter-"));
   const outputTemplate = join(workDir, "audio.%(ext)s");
 
   try {
-    await runCommand(YT_DLP, [
+    const { stdout } = await runCommand(YT_DLP, [
       "--extract-audio",
       "--audio-format",
       "mp3",
@@ -181,8 +186,19 @@ async function downloadMp3(rawUrl) {
       outputTemplate,
       "--no-playlist",
       "--no-warnings",
+      "--print",
+      "%(title)s",
+      "--print",
+      "%(duration)s",
+      "--print",
+      "%(thumbnail)s",
       rawUrl,
     ]);
+
+    const [titleLine = "audio", durationLine = "", thumbnailLine = ""] = stdout
+      .trim()
+      .split(/\r?\n/);
+    const title = titleLine.trim() || "audio";
 
     const files = await readdir(workDir);
     const mp3File = files.find((file) => file.endsWith(".mp3"));
@@ -193,6 +209,13 @@ async function downloadMp3(rawUrl) {
     return {
       filePath: join(workDir, mp3File),
       workDir,
+      info: {
+        videoId,
+        title,
+        durationLabel: formatDuration(Number(durationLine)),
+        thumbnailUrl: thumbnailLine || null,
+        filename: `${sanitizeFilename(title)}.mp3`,
+      },
     };
   } catch (error) {
     await rm(workDir, { recursive: true, force: true });
@@ -256,15 +279,12 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.url === "/download") {
-      const [info, download] = await Promise.all([
-        fetchVideoInfo(rawUrl),
-        downloadMp3(rawUrl),
-      ]);
+      const download = await downloadMp3(rawUrl);
 
       const fileStream = createReadStream(download.filePath);
       response.writeHead(200, {
         "Content-Type": "audio/mpeg",
-        "Content-Disposition": buildContentDisposition(info.filename),
+        "Content-Disposition": buildContentDisposition(download.info.filename),
         "Cache-Control": "no-store",
       });
 
