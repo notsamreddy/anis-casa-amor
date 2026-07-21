@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { getDb } from "@/db";
@@ -131,6 +131,15 @@ export async function searchWatchlist(query: string, mediaType: MediaType) {
   return searchTmdb(query, mediaType);
 }
 
+async function getNextWatchlistSortOrder(mediaType: MediaType): Promise<number> {
+  const [result] = await getDb()
+    .select({ maxOrder: max(movies.sortOrder) })
+    .from(movies)
+    .where(eq(movies.mediaType, mediaType));
+
+  return (result?.maxOrder ?? -1) + 1;
+}
+
 export async function addWatchlistItem(input: {
   userId: string;
   title: string;
@@ -151,6 +160,7 @@ export async function addWatchlistItem(input: {
       title,
       mediaType: input.mediaType,
       priority: input.priority,
+      sortOrder: await getNextWatchlistSortOrder(input.mediaType),
       posterUrl: input.posterUrl ?? null,
       tmdbId: input.tmdbId ?? null,
     })

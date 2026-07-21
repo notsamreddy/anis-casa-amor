@@ -52,6 +52,7 @@ const PRIORITY_ORDER: Record<MediaPriority, number> = {
 export function sortWatchlistItems<T extends {
   completed: boolean;
   priority: MediaPriority;
+  sortOrder: number;
   id: number;
 }>(items: T[]): T[] {
   return [...items].sort((a, b) => {
@@ -59,6 +60,11 @@ export function sortWatchlistItems<T extends {
       return a.completed ? 1 : -1;
     }
 
+    if (a.sortOrder !== b.sortOrder) {
+      return a.sortOrder - b.sortOrder;
+    }
+
+    // Legacy tiebreaker for items that share the default sortOrder.
     const priorityDiff = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
     if (priorityDiff !== 0) {
       return priorityDiff;
