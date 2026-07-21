@@ -65,6 +65,7 @@ export const movies = pgTable("movies", {
   mediaType: mediaTypeEnum("media_type").notNull().default("movie"),
   priority: mediaPriorityEnum("priority").notNull().default("medium"),
   completed: boolean("completed").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
   posterUrl: text("poster_url"),
   tmdbId: integer("tmdb_id"),
 });

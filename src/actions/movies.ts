@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@clerk/nextjs/server";
-import { eq } from "drizzle-orm";
+import { eq, inArray, max } from "drizzle-orm";
 
 import { getDb } from "@/db";
 import { movies, type MediaPriority, type MediaType } from "@/db/schema";
@@ -23,6 +23,15 @@ async function requireUserId() {
   return userId;
 }
 
+async function getNextSortOrder(mediaType: MediaType): Promise<number> {
+  const [result] = await getDb()
+    .select({ maxOrder: max(movies.sortOrder) })
+    .from(movies)
+    .where(eq(movies.mediaType, mediaType));
+
+  return (result?.maxOrder ?? -1) + 1;
+}
+
 export async function createMovie(input: MovieInput) {
   const userId = await requireUserId();
 
@@ -38,6 +47,7 @@ export async function createMovie(input: MovieInput) {
       title,
       mediaType: input.mediaType,
       priority: input.priority,
+      sortOrder: await getNextSortOrder(input.mediaType),
       posterUrl: input.posterUrl ?? null,
       tmdbId: input.tmdbId ?? null,
     })
@@ -76,6 +86,44 @@ export async function updateMoviePriority(id: number, priority: MediaPriority) {
     .update(movies)
     .set({ priority })
     .where(eq(movies.id, id));
+
+  revalidatePath("/movies");
+}
+
+export async function reorderMovies(orderedIds: number[]) {
+  await requireUserId();
+
+  if (orderedIds.length === 0) {
+    return;
+  }
+
+  if (orderedIds.some((id) => !Number.isInteger(id) || id <= 0)) {
+    throw new Error("Invalid movie id");
+  }
+
+  if (new Set(orderedIds).size !== orderedIds.length) {
+    throw new Error("Duplicate movie ids");
+  }
+
+  const existing = await getDb()
+    .select({ id: movies.id })
+    .from(movies)
+    .where(inArray(movies.id, orderedIds));
+
+  if (existing.length !== orderedIds.length) {
+    throw new Error("One or more movies were not found");
+  }
+
+  await getDb().transaction(async (tx) => {
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        tx
+          .update(movies)
+          .set({ sortOrder: index })
+          .where(eq(movies.id, id)),
+      ),
+    );
+  });
 
   revalidatePath("/movies");
 }

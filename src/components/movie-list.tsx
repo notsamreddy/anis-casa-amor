@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Film, Plus, Shuffle, Trash2, Tv } from "lucide-react";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { Film, GripVertical, Plus, Shuffle, Trash2, Tv } from "lucide-react";
 
 import { AddMovieDialog, MediaPoster } from "@/components/add-movie-dialog";
 import { MovieDetailDialog } from "@/components/movie-detail-dialog";
 import {
   deleteMovie,
+  reorderMovies,
   toggleMovieCompletion,
   updateMoviePriority,
 } from "@/actions/movies";
@@ -63,21 +64,55 @@ export function MovieList({ movies }: MovieListProps) {
   const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null);
   const [randomPick, setRandomPick] = useState<Movie | null>(null);
   const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
+  const [localOrder, setLocalOrder] = useState<{
+    key: string;
+    movies: Movie[];
+  } | null>(null);
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+
+  const itemRefs = useRef(new Map<number, HTMLElement>());
+  const orderedMoviesRef = useRef<Movie[]>([]);
+  const dragState = useRef<{
+    id: number;
+    originIds: number[];
+  } | null>(null);
 
   const filteredMovies = useMemo(
     () => sortWatchlistItems(movies.filter((movie) => movie.mediaType === filterType)),
     [movies, filterType],
   );
 
+  const listKey = filteredMovies
+    .map((movie) => `${movie.id}:${movie.sortOrder}:${movie.completed}:${movie.priority}`)
+    .join("|");
+
+  const orderedMovies =
+    localOrder?.key === listKey ? localOrder.movies : filteredMovies;
+
   const unwatchedMovies = useMemo(
-    () => filteredMovies.filter((movie) => !movie.completed),
-    [filteredMovies],
+    () => orderedMovies.filter((movie) => !movie.completed),
+    [orderedMovies],
   );
 
-  const completedCount = filteredMovies.filter((movie) => movie.completed).length;
-  const total = filteredMovies.length;
+  const completedCount = orderedMovies.filter((movie) => movie.completed).length;
+  const total = orderedMovies.length;
   const percent = total > 0 ? Math.round((completedCount / total) * 100) : 0;
   const hasAnyMovies = movies.length > 0;
+
+  function applyLocalOrder(nextMovies: Movie[]) {
+    orderedMoviesRef.current = nextMovies;
+    setLocalOrder({ key: listKey, movies: nextMovies });
+  }
+
+  function persistOrder(nextMovies: Movie[]) {
+    const orderedIds = nextMovies
+      .filter((movie) => !movie.completed)
+      .map((movie) => movie.id);
+
+    startTransition(async () => {
+      await reorderMovies(orderedIds);
+    });
+  }
 
   function handleToggle(id: number, checked: boolean) {
     startTransition(async () => {
@@ -116,6 +151,109 @@ export function MovieList({ movies }: MovieListProps) {
     });
   }
 
+  function reorderUnwatchedAtPointer(clientY: number, draggedId: number): Movie[] | null {
+    const current = orderedMoviesRef.current;
+    const unwatched = current.filter((movie) => !movie.completed);
+    const completed = current.filter((movie) => movie.completed);
+    const dragged = unwatched.find((movie) => movie.id === draggedId);
+    if (!dragged) {
+      return null;
+    }
+
+    const others = unwatched.filter((movie) => movie.id !== draggedId);
+    let insertAt = others.length;
+
+    for (let index = 0; index < others.length; index += 1) {
+      const node = itemRefs.current.get(others[index].id);
+      if (!node) {
+        continue;
+      }
+
+      const rect = node.getBoundingClientRect();
+      if (clientY < rect.top + rect.height / 2) {
+        insertAt = index;
+        break;
+      }
+    }
+
+    const nextUnwatched = [...others];
+    nextUnwatched.splice(insertAt, 0, dragged);
+
+    const unchanged = nextUnwatched.every(
+      (movie, index) => movie.id === unwatched[index]?.id,
+    );
+    if (unchanged) {
+      return null;
+    }
+
+    return [...nextUnwatched, ...completed];
+  }
+
+  function handleDragHandlePointerDown(
+    event: React.PointerEvent<HTMLButtonElement>,
+    movie: Movie,
+  ) {
+    if (movie.completed || event.button !== 0) {
+      return;
+    }
+
+    const originIds = orderedMovies
+      .filter((item) => !item.completed)
+      .map((item) => item.id);
+
+    if (!originIds.includes(movie.id)) {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    orderedMoviesRef.current = orderedMovies;
+    dragState.current = { id: movie.id, originIds };
+    setDraggingId(movie.id);
+  }
+
+  function handleDragHandlePointerMove(
+    event: React.PointerEvent<HTMLButtonElement>,
+  ) {
+    if (!dragState.current) {
+      return;
+    }
+
+    const nextMovies = reorderUnwatchedAtPointer(
+      event.clientY,
+      dragState.current.id,
+    );
+    if (!nextMovies) {
+      return;
+    }
+
+    applyLocalOrder(nextMovies);
+  }
+
+  function handleDragHandlePointerUp() {
+    if (!dragState.current) {
+      setDraggingId(null);
+      return;
+    }
+
+    const { originIds } = dragState.current;
+    const nextMovies = orderedMoviesRef.current;
+    const nextIds = nextMovies
+      .filter((movie) => !movie.completed)
+      .map((movie) => movie.id);
+
+    dragState.current = null;
+    setDraggingId(null);
+
+    const changed =
+      originIds.length !== nextIds.length ||
+      originIds.some((id, index) => id !== nextIds[index]);
+
+    if (changed) {
+      persistOrder(nextMovies);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -125,7 +263,9 @@ export function MovieList({ movies }: MovieListProps) {
           </span>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Watchlist</h1>
-            <p className="text-muted-foreground">Movies and series to watch</p>
+            <p className="text-muted-foreground">
+              Drag unwatched titles to set your watch order
+            </p>
           </div>
         </div>
 
@@ -188,7 +328,7 @@ export function MovieList({ movies }: MovieListProps) {
         </div>
       )}
 
-      {filteredMovies.length === 0 ? (
+      {orderedMovies.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             {hasAnyMovies
@@ -216,17 +356,26 @@ export function MovieList({ movies }: MovieListProps) {
           </div>
 
           <div className="space-y-3">
-            {filteredMovies.map((movie) => {
+            {orderedMovies.map((movie) => {
               const theme = MEDIA_PRIORITY_THEME[movie.priority];
               const isRandomHighlight = randomPick?.id === movie.id;
+              const isDragging = draggingId === movie.id;
 
               return (
                 <Card
                   key={movie.id}
+                  ref={(node) => {
+                    if (node) {
+                      itemRefs.current.set(movie.id, node);
+                    } else {
+                      itemRefs.current.delete(movie.id);
+                    }
+                  }}
                   className={cn(
                     "relative overflow-hidden py-0 transition-colors",
                     movie.completed && theme.tint,
                     isRandomHighlight && "ring-2 ring-fuchsia-500/50",
+                    isDragging && "opacity-60 ring-2 ring-fuchsia-500/40",
                   )}
                 >
                   <div
@@ -235,7 +384,26 @@ export function MovieList({ movies }: MovieListProps) {
                       theme.accent,
                     )}
                   />
-                  <CardContent className="flex items-start gap-3.5 p-4 pl-5">
+                  <CardContent className="flex items-start gap-3 p-4 pl-5">
+                    {!movie.completed ? (
+                      <button
+                        type="button"
+                        aria-label={`Reorder ${movie.title}`}
+                        disabled={isPending}
+                        className="mt-1 touch-none cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing disabled:opacity-50"
+                        onPointerDown={(event) =>
+                          handleDragHandlePointerDown(event, movie)
+                        }
+                        onPointerMove={handleDragHandlePointerMove}
+                        onPointerUp={handleDragHandlePointerUp}
+                        onPointerCancel={handleDragHandlePointerUp}
+                      >
+                        <GripVertical className="size-5" />
+                      </button>
+                    ) : (
+                      <span className="mt-1 size-5 shrink-0" aria-hidden />
+                    )}
+
                     <Checkbox
                       id={`movie-${movie.id}`}
                       checked={movie.completed}
